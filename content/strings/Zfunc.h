@@ -8,15 +8,15 @@
  */
 #pragma once
 
-vi Z(const string& S) {
-	vi z(sz(S));
-	int l = -1, r = -1;
-	rep(i,1,sz(S)) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < sz(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
+vector<int> z_func(string s) {
+	int n = s.size();
+	vector<int> z(n);
+	int l = 0, r = 0;
+	for (int i = 0; i < n; i++) {
+		z[i] = max(0, min(z[i - l], r - i + 1));
+		while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+			l = i, r = i + z[i], z[i]++;
+		}
 	}
 	return z;
 }

@@ -1,4 +1,4 @@
-/**
+	/**
  * Author: Lukas Polacek
  * Date: 2009-10-26
  * License: CC0
@@ -8,17 +8,18 @@
  */
 #pragma once
 
-struct UF {
-	vi e;
-	UF(int n) : e(n, -1) {}
-	bool sameSet(int a, int b) { return find(a) == find(b); }
-	int size(int x) { return -e[find(x)]; }
-	int find(int x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
-	bool join(int a, int b) {
-		a = find(a), b = find(b);
-		if (a == b) return false;
-		if (e[a] > e[b]) swap(a, b);
-		e[a] += e[b]; e[b] = a;
+struct DSU {
+	vector<int> par, sizes;
+	DSU(int n) : par(n), sizes(n, 1) { iota(par.begin(), par.end(), 0); }
+	int find(int x) { return (par[x] == x ? x : par[x] = find(par[x])); }
+	bool unite(int x, int y) {
+		int x_root = find(x), y_root = find(y);
+		if (x_root == y_root)
+			return false;
+		if (sizes[x_root] < sizes[y_root])
+			swap(x_root, y_root);
+		sizes[x_root] += sizes[y_root];
+		par[y_root] = x_root;
 		return true;
 	}
 };

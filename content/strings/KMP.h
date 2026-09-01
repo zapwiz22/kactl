@@ -10,19 +10,17 @@
  */
 #pragma once
 
-vi pi(const string& s) {
-	vi p(sz(s));
-	rep(i,1,sz(s)) {
-		int g = p[i-1];
-		while (g && s[i] != s[g]) g = p[g-1];
-		p[i] = g + (s[i] == s[g]);
+vector<int> kmp(vector<int>& pat) {
+	int n = (int)pat.size();
+	// lps[i] => longest prefix which is also suffix for the sub-pattern [0...i]
+	vector<int> lps(n, 0);
+	int i = 1, len = 0;
+	while (i < n) {
+		if (pat[i] == pat[len]) {
+			len++, lps[i] = len, i++;
+		} else {
+			if (len != 0) len = lps[len - 1];
+			else i++;
+		}
 	}
-	return p;
-}
-
-vi match(const string& s, const string& pat) {
-	vi p = pi(pat + '\0' + s), res;
-	rep(i,sz(p)-sz(s),sz(p))
-		if (p[i] == sz(pat)) res.push_back(i - 2 * sz(pat));
-	return res;
 }

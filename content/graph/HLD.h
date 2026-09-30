@@ -17,49 +17,85 @@
 
 #include "../data-structures/LazySegmentTree.h"
 
-template <bool VALS_EDGES> struct HLD {
-	int N, tim = 0;
-	vector<vi> adj;
-	vi par, siz, rt, pos;
-	Node *tree;
-	HLD(vector<vi> adj_)
-		: N(sz(adj_)), adj(adj_), par(N, -1), siz(N, 1),
-		  rt(N),pos(N),tree(new Node(0, N)){ dfsSz(0); dfsHld(0); }
-	void dfsSz(int v) {
-		for (int& u : adj[v]) {
-			adj[u].erase(find(all(adj[u]), v));
-			par[u] = v;
-			dfsSz(u);
-			siz[v] += siz[u];
-			if (siz[u] > siz[adj[v][0]]) swap(u, adj[v][0]);
-		}
-	}
-	void dfsHld(int v) {
-		pos[v] = tim++;
-		for (int u : adj[v]) {
-			rt[u] = (u == adj[v][0] ? rt[v] : u);
-			dfsHld(u);
-		}
-	}
-	template <class B> void process(int u, int v, B op) {
-		for (;; v = par[rt[v]]) {
-			if (pos[u] > pos[v]) swap(u, v);
-			if (rt[u] == rt[v]) break;
-			op(pos[rt[v]], pos[v] + 1);
-		}
-		op(pos[u] + VALS_EDGES, pos[v] + 1);
-	}
-	void modifyPath(int u, int v, int val) {
-		process(u, v, [&](int l, int r) { tree->add(l, r, val); });
-	}
-	int queryPath(int u, int v) { // Modify depending on problem
-		int res = -1e9;
-		process(u, v, [&](int l, int r) {
-				res = max(res, tree->query(l, r));
-		});
-		return res;
-	}
-	int querySubtree(int v) { // modifySubtree is similar
-		return tree->query(pos[v] + VALS_EDGES, pos[v] + siz[v]);
-	}
-};
+const int N = 200000;
+int a[N];
+int seg[2 * N];
+int SZ;
+void build(int n) {
+    SZ = n;
+    for (int i = 0; i < n; i++) seg[i + SZ] = a[i];
+    for (int i = SZ - 1; i >= 1; i--) seg[i] = max(seg[i << 1], seg[i << 1 | 1]);
+}
+void update(int pos, int val) {
+    pos += SZ;
+    seg[pos] = val;
+    for (pos >>= 1; pos; pos >>= 1) seg[pos] = max(seg[pos << 1], seg[pos << 1 | 1]);
+}
+int query(int l, int r) {   // inclusive
+    int res = 0;
+    l += SZ;
+    r += SZ + 1;
+    while (l < r) {
+        if (l & 1) res = max(res, seg[l++]);
+        if (r & 1) res = max(res, seg[--r]);
+        l >>= 1;
+        r >>= 1;
+    }
+    return res;
+}
+
+vector<int> parent, depth, heavy, head, pos;
+int cur_pos;
+
+int dfs(int v, vector<vector<int>> const& adj) {
+    int size = 1;
+    int max_c_size = 0;
+    for (int c : adj[v]) {
+        if (c != parent[v]) {
+            parent[c] = v, depth[c] = depth[v] + 1;
+            int c_size = dfs(c, adj);
+            size += c_size;
+            if (c_size > max_c_size)
+                max_c_size = c_size, heavy[v] = c;
+        }
+    }
+    return size;
+}
+
+void decompose(int v, int h, vector<vector<int>> const& adj) {
+    head[v] = h, pos[v] = cur_pos++;
+    if (heavy[v] != -1)
+        decompose(heavy[v], h, adj);
+    for (int c : adj[v]) {
+        if (c != parent[v] && c != heavy[v])
+            decompose(c, c, adj);
+    }
+}
+
+void init(vector<vector<int>> const& adj) {
+    int n = adj.size();
+    parent = vector<int>(n);
+    depth = vector<int>(n);
+    heavy = vector<int>(n, -1);
+    head = vector<int>(n);
+    pos = vector<int>(n);
+    cur_pos = 0;
+
+    dfs(0, adj);
+    decompose(0, 0, adj);
+}
+
+int query_hld(int a, int b, int n) {
+    int res = 0;
+    for (; head[a] != head[b]; b = parent[head[b]]) {
+        if (depth[head[a]] > depth[head[b]])
+            swap(a, b);
+        int cur_heavy_path_max = query(pos[head[b]], pos[b]);
+        res = max(res, cur_heavy_path_max);
+    }
+    if (depth[a] > depth[b])
+        swap(a, b);
+    int last_heavy_path_max = query(pos[a], pos[b]);
+    res = max(res, last_heavy_path_max);
+    return res;
+}

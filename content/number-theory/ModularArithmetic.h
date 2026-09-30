@@ -8,24 +8,20 @@
  */
 #pragma once
 
-#include "euclid.h"
-
-const ll mod = 17; // change to something else
-struct Mod {
+const ll mod = 1e9 + 7;
+template<int mod>
+struct Mint {
 	ll x;
-	Mod(ll y) : Mod(y%mod+mod,0){}
-	Mod(ll y,int) : x(y<mod?y:y-mod){}
-	Mod operator+(Mod b) { return {x + b.x,0}; }
-	Mod operator-(Mod b) { return {x - b.x + mod,0}; }
-	Mod operator*(Mod b) { return {x * b.x % mod,0}; }
-	Mod operator/(Mod b) { return *this * invert(b); }
-	Mod invert(Mod a) {
-		ll x, y, g = euclid(a.x, mod, x, y);
-		assert(g == 1); return x;
-	}
-	Mod operator^(ll e) {
+	Mint(ll y = 0) : x((y % mod + mod) % mod){}
+	Mint operator+(Mint b) { return {x + b.x}; }
+	Mint operator-(Mint b) { return {x - b.x}; }
+	Mint operator*(Mint b) { return {x * b.x}; }
+	Mint operator/(Mint b) { return *this * inv(b); }
+	Mint inv(Mint a) { return a ^ (mod - 2); }
+	Mint operator^(ll e) {
 		if (!e) return 1;
-		Mod r = *this ^ (e / 2); r = r * r;
+		Mint r = *this ^ (e / 2); r = r * r;
 		return e&1 ? *this * r : r;
 	}
 };
+using mint = Mint<mod>;

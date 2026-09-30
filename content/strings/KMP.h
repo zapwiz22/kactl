@@ -23,4 +23,5 @@ vector<int> kmp(vector<int>& pat) {
 			else i++;
 		}
 	}
+	return lps;
 }

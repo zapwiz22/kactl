@@ -9,6 +9,10 @@
 #pragma once
 
 array<vi, 2> manacher(const string& s) {
+	/* 
+	p[0][i] => half length of longest even palindrome around pos i
+	p[1][i] => half length (rounded down) of longest odd palindrome around pos i
+	*/
 	int n = sz(s);
 	array<vi,2> p = {vi(n+1), vi(n)};
 	rep(z,0,2) for (int i=0,l=0,r=0; i < n; i++) {

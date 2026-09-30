@@ -11,7 +11,7 @@
 #pragma once
 
 struct Line {
-	mutable ll k, m, p;
+	mutable ll k, m, p; /* kx * m is the line form */
 	bool operator<(const Line& o) const { return k < o.k; }
 	bool operator<(ll x) const { return p < x; }
 };

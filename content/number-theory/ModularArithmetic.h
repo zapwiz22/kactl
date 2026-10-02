@@ -8,20 +8,21 @@
  */
 #pragma once
 
-const ll mod = 1e9 + 7;
+const ll mod = 998244353;
 template<int mod>
-struct Mint {
-	ll x;
-	Mint(ll y = 0) : x((y % mod + mod) % mod){}
-	Mint operator+(Mint b) { return {x + b.x}; }
-	Mint operator-(Mint b) { return {x - b.x}; }
-	Mint operator*(Mint b) { return {x * b.x}; }
-	Mint operator/(Mint b) { return *this * inv(b); }
-	Mint inv(Mint a) { return a ^ (mod - 2); }
-	Mint operator^(ll e) {
-		if (!e) return 1;
-		Mint r = *this ^ (e / 2); r = r * r;
-		return e&1 ? *this * r : r;
-	}
+struct Mod {
+    ll x;
+    Mod(ll y = 0) : Mod(y%mod+mod,0){}
+    Mod(ll y,int) : x(y<mod?y:y-mod){}
+    Mod operator+(Mod b) { return {x + b.x,0}; }
+    Mod operator-(Mod b) { return {x - b.x + mod,0}; }
+    Mod operator*(Mod b) { return {x * b.x % mod,0}; }
+    Mod operator/(Mod b) { return *this * invert(b); }
+    Mod invert(Mod a) { return a ^ (mod - 2); }
+    Mod operator^(ll e) {
+        if (!e) return 1;
+        Mod r = *this ^ (e / 2); r = r * r;
+        return e&1 ? *this * r : r;
+    }
 };
-using mint = Mint<mod>;
+using mint = Mod<mod>;
